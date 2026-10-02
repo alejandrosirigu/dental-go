@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#10b981">
+<title>Dental GO · Explora tu gabinete</title>
+<style>
+:root {
+  --primary: #10b981;
+  --primary-dark: #059669;
+  --primary-light: #d1fae5;
+  --accent: #8b5cf6;
+  --accent-yellow: #f59e0b;
+  --blue: #0284c7;
+  --blue-light: #e0f2fe;
+  --bg-gradient: linear-gradient(135deg, #f0fdf4 0%, #e0f2fe 50%, #fef3c7 100%);
+  --ink: #0f172a;
+  --muted: #64748b;
+  --card-bg: rgba(255, 255, 255, 0.92);
+  --shadow-sm: 0 4px 12px rgba(15, 23, 42, 0.05);
+  --shadow-lg: 0 12px 32px rgba(16, 185, 129, 0.15);
+  --radius: 22px;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg-gradient);
+  background-attachment: fixed;
+  font-family: system-ui, -apple-system, "SF Pro Rounded", "Segoe UI", Roboto, sans-serif;
+  color: var(--ink);
+  line-height: 1.5;
+  padding-bottom: 90px;
+}
+
+button, input { font: inherit; }
+button { cursor: pointer; transition: transform 0.15s ease, background-color 0.2s, box-shadow 0.2s; }
+button:active { transform: scale(0.96); }
+
+.app { max-width: 760px; margin: auto; padding: 16px 16px 40px; }
+
+/* HEADER & PLAYER STATS BAR */
+header {
+  text-align: center;
+  padding: 12px 8px 18px;
+  position: relative;
+}
+.header-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.logo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  padding: 6px 14px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: var(--shadow-sm);
+  font-weight: 800;
+  font-size: 15px;
+  color: var(--primary-dark);
+}
+.sound-toggle {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(203, 213, 225, 0.6);
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  font-size: 18px;
+}
+
+h1 { font-size: 32px; margin: 4px 0 2px; font-weight: 900; letter-spacing: -0.8px; background: linear-gradient(135deg, #059669, #0284c7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.subtitle { color: var(--muted); margin: 0; font-size: 14px; font-weight: 600; }
+
+.author-tag {
+  display: inline-block;
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  padding: 4px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+.author-tag strong { color: var(--primary-dark); }
+.author-tag span { color: var(--accent); }
+
+/* USER CARD & GAMIFICATION XP BAR */
+.card {
+  background: var(--card-bg);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-lg);
+  margin: 14px 0;
+  position: relative;
+}
+
+.player-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+  border: 2px solid #a7f3d0;
+}
+.player-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.avatar {
+  width: 52px; height: 52px;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  border-radius: 18px;
+  display: grid; place-items: center;
+  font-size: 26px;
+  color: white;
+  box-shadow: 0 6px 16px rgba(16, 185, 129, 0.3);
+}
+.player-info { flex: 1; }
+.player-rank { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--accent); letter-spacing: 0.5px; }
+.player-name-input {
+  width: 100%; border: 2px solid #e2e8f0; border-radius: 12px; padding: 8px 12px;
+  font-weight: 700; font-size: 16px; color: var(--ink); background: #fff; outline: none; margin-top: 2px;
+}
+.player-name-input:focus { border-color: var(--primary); }
+
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 12px 0 6px; text-align: center; }
+.stat-box { background: rgba(241, 245, 249, 0.8); padding: 8px 6px; border-radius: 14px; }
+.stat-val { font-size: 18px; font-weight: 900; color: var(--ink); }
+.stat-lbl { font-size: 11px; font-weight: 700; color: var(--muted); text-transform: uppercase; }
+
+.xp-bar-wrap { margin-top: 10px; }
+.xp-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: 800; margin-bottom: 4px; }
+.progress-bg { height: 14px; background: #e2e8f0; border-radius: 20px; overflow: hidden; position: relative; }
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #06b6d4, var(--accent));
+  background-size: 200% 100%;
+  animation: shimmer 3s infinite linear;
+  width: 0%; transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+
+/* BUTTONS */
+.btn {
+  border: 0; border-radius: 16px; padding: 13px 20px; font-weight: 800; font-size: 15px; color: #fff;
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+.btn.secondary { background: #f1f5f9; color: var(--ink); box-shadow: none; border: 1px solid #cbd5e1; }
+.btn.ghost { background: transparent; color: var(--primary-dark); border: 2px solid #a7f3d0; box-shadow: none; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ZONES & MISSIONS */
+.zone { overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; }
+.zone.locked { opacity: 0.68; filter: grayscale(0.2); }
+.zone-head { display: flex; gap: 14px; align-items: center; }
+.zone-icon {
+  width: 56px; height: 56px; border-radius: 18px; display: grid; place-items: center;
+  font-size: 30px; background: var(--primary-light); flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+.zone-title { flex: 1; }
+.zone-title h2 { margin: 0; font-size: 20px; font-weight: 800; }
+.zone-title p { margin: 2px 0 0; color: var(--muted); font-size: 13px; font-weight: 500; }
+.badge { font-size: 12px; background: #ecfdf5; color: var(--primary-dark); padding: 6px 12px; border-radius: 20px; font-weight: 800; border: 1px solid #a7f3d0; }
+
+.lock-note { font-size: 13px; margin: 12px 0 0; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+
+.mission-list { margin-top: 16px; display: grid; gap: 10px; }
+.mission {
+  display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+  border-radius: 16px; background: #ffffff; border: 1.5px solid #f1f5f9;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.02); transition: all 0.2s ease;
+}
+.mission:hover { border-color: var(--primary-light); transform: translateY(-1px); }
+.dot {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;
+  background: #f1f5f9; color: var(--muted); font-size: 14px; font-weight: 800; flex-shrink: 0;
+}
+.mission.done { background: #f0fdf4; border-color: #bbf7d0; }
+.mission.done .dot { background: var(--primary); color: white; box-shadow: 0 3px 8px rgba(16, 185, 129, 0.3); }
+.mission span:nth-child(2) { flex: 1; font-weight: 700; font-size: 14.5px; color: var(--ink); }
+.mission-thumb { width: 36px; height: 36px; border-radius: 10px; object-fit: cover; border: 2px solid var(--primary); }
+
+/* VIEWS */
+.view { display: none; }
+.view.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+/* MISSION DETAIL */
+.back { margin-bottom: 12px; }
+.mission-detail { background: #fff; border-radius: 26px; padding: 22px; box-shadow: var(--shadow-lg); }
+.crumb { font-size: 13px; color: var(--primary-dark); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+.detail-icon { font-size: 52px; margin: 8px 0; }
+h2.detail-title { font-size: 26px; font-weight: 900; margin: 0 0 14px; line-height: 1.2; }
+
+.info-grid { display: grid; gap: 12px; }
+.info { border-radius: 18px; padding: 15px; border: 1px solid rgba(0,0,0,0.04); }
+.info h3 { font-size: 14px; margin: 0 0 6px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+.info p { margin: 0; font-size: 14px; color: #334155; font-weight: 500; }
+.info.what { background: #e0f2fe; }
+.info.use { background: #d1fae5; }
+.info.recognize { background: #fef3c7; }
+.info.task { background: #fce7f3; }
+
+.photo-box {
+  margin-top: 18px; border: 2.5px dashed #cbd5e1; border-radius: 22px; padding: 16px;
+  text-align: center; background: #fafafa; position: relative; overflow: hidden;
+}
+.photo-box.has-photo { border-style: solid; border-color: var(--primary); background: #f0fdf4; }
+.photo-box img { width: 100%; max-height: 380px; object-fit: contain; border-radius: 16px; display: none; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+.photo-placeholder { padding: 28px 10px; color: var(--muted); }
+.photo-placeholder .big { font-size: 44px; margin-bottom: 6px; }
+.photo-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
+.hidden-file { display: none; }
+.capture-note { font-size: 12px; color: var(--muted); margin-top: 10px; font-weight: 500; }
+
+.complete-row {
+  display: flex; align-items: center; gap: 12px; margin-top: 16px; padding: 14px;
+  background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 18px;
+}
+.complete-row input { width: 24px; height: 24px; accent-color: var(--primary-dark); cursor: pointer; }
+.complete-row label { font-weight: 800; font-size: 14px; cursor: pointer; color: var(--primary-dark); }
+
+/* BOTTOM NAV */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex; justify-content: center; gap: 12px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  z-index: 30; box-shadow: 0 -4px 20px rgba(0,0,0,0.05);
+}
+.nav-btn {
+  border: 0; background: transparent; color: var(--muted); padding: 10px 20px;
+  border-radius: 16px; font-weight: 800; font-size: 14px; display: flex; align-items: center; gap: 6px;
+}
+.nav-btn.active { background: var(--primary-light); color: var(--primary-dark); }
+
+/* LEVEL UP & VICTORY MODAL */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(8px);
+  display: grid; place-items: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+.modal-card {
+  background: white; border-radius: 28px; padding: 28px; text-align: center; max-width: 420px; width: 100%;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: scale(0.8); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.modal-overlay.active .modal-card { transform: scale(1); }
+.modal-icon { font-size: 64px; margin-bottom: 10px; display: inline-block; animation: bounce 1s infinite alternate; }
+@keyframes bounce { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+.modal-title { font-size: 26px; font-weight: 900; margin: 0 0 6px; color: var(--ink); }
+.modal-desc { color: var(--muted); font-weight: 600; font-size: 15px; margin: 0 0 20px; }
+
+/* CANVAS CONFETTI */
+#confettiCanvas { position: fixed; inset: 0; pointer-events: none; z-index: 99; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%) translateY(20px);
+  background: var(--ink); color: #fff; padding: 12px 22px; border-radius: 20px; opacity: 0;
+  pointer-events: none; transition: all 0.3s ease; z-index: 60; font-weight: 800; font-size: 14px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 8px;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+footer {
+  text-align: center;
+  padding: 20px 10px 10px;
+  font-size: 13px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+@media(min-width:650px){
+ .info-grid { grid-template-columns: 1fr 1fr; }
+ .info.task { grid-column: 1 / -1; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="app">
+  <header>
+    <div class="header-top">
+      <div class="logo-badge">🦷 Dental GO v2.0</div>
+      <button class="sound-toggle" id="soundBtn" onclick="toggleSound()" title="Activar/Desactivar Sonido">🔊</button>
+    </div>
+    <h1>Gabinete Dental GO</h1>
+    <p class="subtitle">Explora · Identifica · Captura · Sube de Nivel</p>
+    <div class="author-tag">Creado por <strong>Alejandro Sirigu</strong> | <span>@alejandrosirigu</span></div>
+  </header>
+
+  <!-- HOME VIEW -->
+  <section id="homeView" class="view active">
+    <div class="card player-card">
+      <div class="player-header">
+        <div class="avatar" id="playerAvatar">🎮</div>
+        <div class="player-info">
+          <div class="player-rank" id="playerRank">Nivel 1 · Novato Dental</div>
+          <input id="studentName" class="player-name-input" type="text" placeholder="Escribe tu nombre y apellidos" onblur="saveName()">
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-val" id="statCompleted">0 / 35</div><div class="stat-lbl">Fotos</div></div>
+        <div class="stat-box"><div class="stat-val" id="statXP">0 XP</div><div class="stat-lbl">Puntos</div></div>
+        <div class="stat-box"><div class="stat-val" id="statLevel">Lvl 1</div><div class="stat-lbl">Nivel</div></div>
+      </div>
+
+      <div class="xp-bar-wrap">
+        <div class="xp-top"><span>Progreso de Misiones</span><span id="progressText">0%</span></div>
+        <div class="progress-bg"><div id="progressBar" class="progress-fill"></div></div>
+      </div>
+    </div>
+
+    <div id="zones"></div>
+
+    <div id="finishCard" class="card finish hidden" style="text-align:center; background: linear-gradient(135deg, #fef3c7, #d1fae5);">
+      <div style="font-size: 64px;">🏆</div>
+      <h2 style="font-size:26px; font-weight:900; margin: 4px 0;">¡Gabinete Completado!</h2>
+      <p style="color:var(--muted); font-weight:600;">Has capturado todas las evidencias fotográficas con éxito.</p>
+      <button class="btn" onclick="generatePDF()">📄 Generar mi Dossier Oficial</button>
+    </div>
+
+    <footer>
+      Creado por Alejandro Sirigu | @alejandrosirigu
+    </footer>
+  </section>
+
+  <!-- MISSION DETAIL VIEW -->
+  <section id="missionView" class="view">
+    <button class="btn ghost back" onclick="showHome()">← Volver al mapa</button>
+    <div id="missionContent"></div>
+  </section>
+
+  <!-- PDF / DOSSIER VIEW -->
+  <section id="pdfView" class="view">
+    <button class="btn ghost back" onclick="showHome()">← Volver</button>
+    <div class="card" style="text-align:center; padding:32px 20px;">
+      <div style="font-size:60px">📄🦷</div>
+      <h2 style="font-size:26px; font-weight:900;">Dossier Fotográfico Clínico</h2>
+      <p style="color:var(--muted); font-weight:600; max-width: 440px; margin:0 auto 20px;">Genera e imprime el informe oficial con tus evidencias fotográficas y la descripción técnica de cada elemento del gabinete.</p>
+      <button class="btn" onclick="generatePDF()">🖨️ Imprimir / Guardar Dossier PDF</button>
+    </div>
+  </section>
+</div>
+
+<!-- BOTTOM NAVIGATION -->
+<div class="bottom-nav">
+  <button class="nav-btn active" id="navHome" onclick="showHome()">🗺️ Mapa Misiones</button>
+  <button class="nav-btn" id="navPdf" onclick="showPDF()">📄 Mi Dossier</button>
+</div>
+
+<!-- REWARD / LEVEL UP MODAL -->
+<div class="modal-overlay" id="rewardModal">
+  <div class="modal-card">
+    <div class="modal-icon" id="modalIcon">🎉</div>
+    <h2 class="modal-title" id="modalTitle">¡Zona Desbloqueada!</h2>
+    <p class="modal-desc" id="modalDesc">Has ganado +250 XP y has desbloqueado un nuevo sector del gabinete dental.</p>
+    <button class="btn" style="width:100%" onclick="closeModal()">¡A por la siguiente! 🚀</button>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+/* AUDIO SYNTHESIZER (Web Audio API) */
+let soundEnabled = true;
+let audioCtx = null;
+
+function getAudioContext() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (audioCtx.state === 'suspended') {
+    audioCtx.resume();
+  }
+  return audioCtx;
+}
+
+function toggleSound() {
+  soundEnabled = !soundEnabled;
+  document.getElementById("soundBtn").textContent = soundEnabled ? "🔊" : "🔇";
+  toast(soundEnabled ? "Sonido activado 🔊" : "Sonido desactivado 🔇");
+}
+
+function playTapSound() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(450, now);
+    osc.frequency.exponentialRampToValueAtTime(150, now + 0.05);
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+    osc.connect(gain); gain.connect(ctx.destination);
+    osc.start(now); osc.stop(now + 0.05);
+  } catch(e){}
+}
+
+function playPhotoSound() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    
+    // Shutter snap
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'triangle';
+    osc1.frequency.setValueAtTime(800, now);
+    osc1.frequency.exponentialRampToValueAtTime(180, now + 0.08);
+    gain1.gain.setValueAtTime(0.35, now);
+    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+    osc1.connect(gain1); gain1.connect(ctx.destination);
+    osc1.start(now); osc1.stop(now + 0.08);
+
+    // Chime
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'sine';
+    osc2.frequency.setValueAtTime(659.25, now + 0.07); // E5
+    osc2.frequency.setValueAtTime(987.77, now + 0.15); // B5
+    gain2.gain.setValueAtTime(0, now + 0.07);
+    gain2.gain.linearRampToValueAtTime(0.25, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+    osc2.connect(gain2); gain2.connect(ctx.destination);
+    osc2.start(now + 0.07); osc2.stop(now + 0.38);
+  } catch(e){}
+}
+
+function playLevelUpSound() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    const notes = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
+    notes.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      const startTime = now + idx * 0.08;
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, startTime);
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.3, startTime + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, startTime + 0.32);
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.start(startTime); osc.stop(startTime + 0.32);
+    });
+  } catch(e){}
+}
+
+/* ZONES & EDUCATIONAL CONTENT */
+const zones = [
+{
+ id:"sillon", icon:"🪑", title:"Sillón dental", desc:"Identifica la unidad donde se posiciona al paciente.", general:true,
+ items:[
+  ["Sillón dental · fotografía general","🪑","El sillón dental es la unidad que permite colocar y mantener al paciente en una posición adecuada durante la atención odontológica.","Permite modificar la posición del paciente y facilita el acceso del equipo profesional a la cavidad oral.","Busca el sillón completo. En la imagen deben reconocerse claramente sus principales partes.","Realiza una fotografía general del sillón dental, procurando que aparezca completo."],
+  ["Cabecero del sillón dental","🔹","Es la parte superior del sillón sobre la que se apoya y posiciona la cabeza del paciente.","Permite adaptar la posición de la cabeza para favorecer el acceso y la ergonomía durante el tratamiento.","Debe diferenciarse del respaldo, situado inmediatamente por debajo.","Fotografía el cabecero de forma que se identifique claramente."],
+  ["Respaldo del sillón dental","🔹","Es la sección del sillón que sostiene la espalda y el tronco del paciente.","Forma parte del sistema de posicionamiento del sillón y puede modificar su inclinación.","Es una superficie amplia situada entre el cabecero y el asiento.","Fotografía el respaldo completo."],
+  ["Asiento del sillón dental","🔹","Es la superficie horizontal o ligeramente inclinada sobre la que se sienta el paciente.","Soporta el peso del paciente y forma parte de la estructura móvil del sillón.","Se encuentra entre el respaldo y la zona de las piernas.","Fotografía el asiento."],
+  ["Reposapiés del sillón dental","🔹","Es la parte inferior destinada a apoyar los pies y las piernas del paciente.","Proporciona apoyo y contribuye al confort y estabilidad durante el tratamiento.","Se sitúa por debajo del asiento y hacia el extremo distal del sillón.","Fotografía el reposapiés."],
+  ["Pedal del sillón dental","🦶","Es un dispositivo de control accionado con el pie.","Permite manejar determinadas funciones del sillón y, según el equipo, controlar también instrumentos o funciones de la unidad dental.","Reconoce sus pedales, botones o controles y relaciónalos con el funcionamiento de la unidad.","Fotografía el pedal completo."]
+ ]},
+{
+ id:"unidad", icon:"⚙️", title:"Unidad de control del sillón dental", desc:"Reconoce los elementos que conectan el equipo con los instrumentos y controles.", general:true,
+ items:[
+  ["Unidad de control del sillón dental · fotografía general","⚙️","Es el conjunto de elementos que integra y organiza diferentes controles, conexiones e instrumentos de la unidad dental.","Permite disponer de los instrumentos y sistemas necesarios para el trabajo clínico.","Busca la unidad completa y observa cómo se distribuyen sus conexiones y mandos.","Realiza una fotografía general de la unidad de control."],
+  ["Mangueras de los rotatorios","🌀","Son conductos flexibles que conectan los instrumentos rotatorios con la unidad dental.","Transportan los elementos necesarios para el funcionamiento del instrumento, como aire, agua o energía según el sistema.","Localiza las conexiones de las piezas rotatorias y diferencia sus mangueras.","Fotografía las mangueras de los rotatorios."],
+  ["Mangueras de rotatorios y ultrasonidos","💧","Son las conexiones que permiten utilizar determinados instrumentos rotatorios y equipos ultrasónicos desde la unidad.","Facilitan el suministro y conexión necesarios para que los instrumentos funcionen.","Observa qué manguera corresponde a cada instrumento disponible en tu gabinete.","Fotografía las mangueras e identifica visualmente sus conexiones."],
+  ["Jeringa de triple función","💦","Es un instrumento que permite aplicar aire, agua o una combinación de ambos.","Se utiliza para limpiar, secar y mantener el campo operatorio durante diferentes procedimientos.","Busca la jeringa y sus botones de control de aire y agua.","Fotografía la jeringa de triple función."],
+  ["Mandos de control del sillón e hídricos","🎛️","Son controles destinados a manejar funciones del sillón y de los sistemas de agua de la unidad.","Permiten activar o regular diferentes funciones del equipo según su diseño.","Identifica los botones o mandos y observa qué funciones señalan.","Fotografía los mandos de control."]
+ ]},
+{
+ id:"hidrica", icon:"💧", title:"Zona hídrica", desc:"Localiza los elementos relacionados con agua, enjuague y aspiración.", general:true,
+ items:[
+  ["Zona hídrica · fotografía general","💧","Es la parte de la unidad dental que agrupa diferentes elementos relacionados con el suministro de agua, el enjuague y la aspiración.","Facilita funciones necesarias durante la atención odontológica y el control de líquidos.","Reconoce la zona completa y la relación entre sus diferentes elementos.","Realiza una fotografía general de la zona hídrica."],
+  ["Escupidera","🚰","Es el recipiente integrado en la unidad dental donde el paciente puede eliminar líquidos de la boca.","Recoge agua, saliva y otros fluidos y facilita el enjuague durante el tratamiento.","Suele presentar una cubeta y un sistema de entrada o salida de agua.","Fotografía la escupidera completa."],
+  ["Vaso","🥛","Es el recipiente destinado a proporcionar agua al paciente durante el enjuague.","Facilita el enjuague oral y forma parte del sistema hídrico de la unidad.","Localiza el soporte o sistema dispensador del vaso.","Fotografía el vaso y su zona de colocación."],
+  ["Aspirador común","💨","Es un sistema de aspiración destinado a retirar líquidos y fluidos de la cavidad oral.","Mantiene el campo de trabajo más limpio y cómodo y ayuda a controlar líquidos durante procedimientos habituales.","Reconoce su cánula y su conexión a la unidad de aspiración.","Fotografía el aspirador común."],
+  ["Aspirador quirúrgico","🧪","Es un sistema de aspiración de mayor capacidad utilizado cuando se requiere una evacuación más intensa o específica de fluidos.","Se emplea en procedimientos que necesitan un control eficaz de líquidos y secreciones.","Diferéncialo del aspirador común por su diseño y calibre según el equipo disponible.","Fotografía el aspirador quirúrgico."],
+  ["Mandos de control hídrico","🎛️","Son los controles que permiten activar determinadas funciones relacionadas con el agua de la unidad.","Facilitan el control del vaso, escupidera u otros sistemas hídricos según el modelo.","Observa los símbolos y botones específicos de tu unidad.","Fotografía los mandos de control hídrico."]
+ ]},
+{
+ id:"auxiliares", icon:"💡", title:"Lámpara y mobiliario auxiliar", desc:"Reconoce los elementos que apoyan la iluminación y organización del gabinete.", general:false,
+ items:[
+  ["Lámpara dental","💡","Es el sistema de iluminación destinado a proporcionar luz sobre el campo de trabajo.","Permite al equipo profesional visualizar correctamente la cavidad oral y el área de tratamiento.","Observa su brazo, cabezal y sistema de posicionamiento.","Fotografía la lámpara dental completa."],
+  ["Bandejas auxiliares","🧺","Son superficies de apoyo destinadas a colocar temporalmente instrumental y materiales necesarios durante el procedimiento.","Favorecen la organización del material y la ergonomía del trabajo clínico.","Localiza las bandejas móviles o integradas que se utilizan como apoyo.","Fotografía las bandejas auxiliares."],
+  ["Mobiliario auxiliar","🗄️","Incluye los muebles destinados al almacenamiento y organización del material del gabinete.","Permite mantener el material ordenado, accesible y protegido.","Identifica los muebles de apoyo que forman parte del área clínica.","Realiza una fotografía del mobiliario auxiliar."]
+ ]},
+{
+ id:"esterilizacion", icon:"🧼", title:"Zona de esterilización", desc:"Explora los equipos utilizados en el procesamiento del instrumental.", general:true,
+ items:[
+  ["Zona de esterilización · fotografía general","🧼","Es el área destinada a las diferentes fases del procesamiento del instrumental reutilizable.","Permite organizar el circuito de limpieza, preparación, empaquetado y esterilización según el protocolo del centro.","Observa cómo se distribuyen los equipos y materiales de esta zona.","Realiza una fotografía general de la zona de esterilización."],
+  ["Autoclave","♨️","Es un equipo que utiliza vapor de agua a presión y temperatura controladas para esterilizar material compatible.","Permite realizar la esterilización mediante un ciclo validado y controlado.","Busca la cámara, puerta, panel de control y elementos identificativos del equipo.","Fotografía el autoclave completo."],
+  ["Ultrasonidos","〰️","Es un equipo de limpieza que utiliza ondas ultrasónicas para favorecer la eliminación de suciedad del instrumental.","Se utiliza como parte del proceso de limpieza previa al empaquetado y esterilización, según el protocolo del centro.","Reconoce la cuba o tanque y sus controles.","Fotografía el equipo de ultrasonidos."],
+  ["Termoselladora y empaquetadora","📦","Es el equipo utilizado para cerrar los envases o bolsas destinados al instrumental antes de su esterilización.","Permite preparar el material para mantener su integridad y condiciones de almacenamiento después del ciclo.","Identifica la zona de sellado y el sistema de control.","Fotografía la termoselladora o equipo de empaquetado."]
+ ]},
+{
+ id:"maquinaria", icon:"🔧", title:"Cuarto de maquinaria", desc:"Identifica los equipos que proporcionan servicios esenciales a la unidad dental.", general:true,
+ items:[
+  ["Cuarto de maquinaria · fotografía general","🔧","Es el espacio donde se ubican equipos que proporcionan determinados servicios necesarios para el funcionamiento de la clínica dental.","Permite mantener separados y organizados equipos técnicos como el compresor o el sistema de aspiración.","Observa los equipos y relaciona cada uno con su función.","Realiza una fotografía general del cuarto de maquinaria."],
+  ["Compresor","🔩","Es el equipo que genera y almacena aire comprimido para diferentes dispositivos de la clínica dental.","Proporciona aire comprimido a determinados instrumentos y sistemas de la unidad dental.","Busca el depósito, motor y elementos de conexión del equipo.","Fotografía el compresor."],
+  ["Máquina de aspiración","💨","Es el equipo que genera la depresión necesaria para los sistemas de aspiración dental.","Permite evacuar líquidos y fluidos desde la cavidad oral hacia el sistema correspondiente.","Identifica el equipo y sus conexiones de aspiración.","Fotografía la máquina de aspiración."]
+ ]},
+{
+ id:"exploracion", icon:"🔍", title:"Bandeja de exploración", desc:"Reconoce el instrumental básico empleado en la exploración oral.", general:true,
+ items:[
+  ["Bandeja de exploración · fotografía general","🔍","Es el conjunto organizado de instrumental básico empleado para realizar la exploración de la cavidad oral.","Permite disponer de forma ordenada de los instrumentos necesarios para diferentes maniobras exploratorias.","Observa el conjunto y trata de reconocer cada instrumento antes de fotografiarlo individualmente.","Realiza una fotografía general de la bandeja de exploración."],
+  ["Sonda periodontal","📏","Es un instrumento fino y graduado utilizado para explorar y realizar mediciones en los tejidos periodontales.","Permite valorar parámetros como la profundidad de sondaje y otros hallazgos periodontales.","Busca la punta fina y las marcas de graduación de la sonda.","Fotografía la sonda periodontal de forma que se aprecien sus características."],
+  ["Espejo","🪞","Es un instrumento que incorpora un espejo dental para proporcionar visión indirecta y facilitar la separación de tejidos.","Permite observar zonas de la cavidad oral que no son directamente visibles y ayudar en determinadas maniobras.","Reconoce el mango y la superficie especular circular u ovalada.","Fotografía el espejo dental."],
+  ["Pinzas porta instrumentos","🗜️","Son pinzas utilizadas para sujetar, transportar o manipular determinados materiales e instrumentos pequeños.","Facilitan la manipulación del material en condiciones de control e higiene.","Observa sus dos ramas y la zona activa de prensión.","Fotografía las pinzas porta instrumentos."]
+ ]},
+{
+ id:"rotatorios", icon:"🌀", title:"Rotatorios", desc:"Diferencia los principales instrumentos rotatorios del gabinete.", general:false,
+ items:[
+  ["Turbina","⚡","Es un instrumento rotatorio de alta velocidad utilizado principalmente para realizar cortes y eliminar tejido dental mediante fresas.","Funciona mediante aire comprimido y alcanza velocidades muy elevadas.","Reconoce su cabeza, cuerpo y sistema de colocación de la fresa.","Fotografía una turbina de forma que pueda identificarse claramente."],
+  ["Micromotor","⚙️","Es un dispositivo que proporciona movimiento rotatorio a diferentes instrumentos odontológicos.","Permite trabajar con distintos accesorios y controlar la velocidad y el sentido de giro según el equipo.","Identifica el cuerpo del micromotor y su conexión.","Fotografía el micromotor."],
+  ["Contraángulo","🔄","Es un accesorio rotatorio cuyo diseño angulado permite trabajar con mayor facilidad en determinadas zonas de la cavidad oral.","Se conecta habitualmente a un micromotor y permite utilizar diferentes fresas o instrumentos rotatorios.","Reconoce la angulación característica de su cabeza respecto al eje.","Fotografía el contraángulo."],
+  ["Pieza de mano","🖊️","Es un instrumento rotatorio de forma alargada utilizado con diferentes accesorios según el procedimiento.","Permite realizar determinadas maniobras clínicas y puede trabajar a distintas velocidades según el tipo de pieza.","Observa su forma, conexión y sistema de sujeción del accesorio.","Fotografía la pieza de mano."]
+ ]}
+];
+
+/* APP STATE */
+const state = {
+  name: localStorage.getItem("dentalgo_name") || "",
+  photos: JSON.parse(localStorage.getItem("dentalgo_photos") || "{}")
+};
+
+const allItems = zones.flatMap(z => z.items.map((x, i) => ({ z, i, data: x })));
+const total = allItems.length;
+
+function save() {
+  localStorage.setItem("dentalgo_name", state.name);
+  localStorage.setItem("dentalgo_photos", JSON.stringify(state.photos));
+}
+
+function saveName() {
+  const v = document.getElementById("studentName").value.trim();
+  if (v && v !== state.name) {
+    state.name = v; save();
+    toast("¡Nombre guardado! 🦷");
+  }
+}
+
+function completedCount() { return Object.keys(state.photos).length; }
+function key(z, i) { return z + "_" + i; }
+function isDone(z, i) { return !!state.photos[key(z, i)]; }
+
+function calculateXP() {
+  let count = completedCount();
+  let xp = count * 100;
+  zones.forEach(z => {
+    const isZoneDone = z.items.every((_, idx) => isDone(z.id, idx));
+    if (isZoneDone) xp += 250;
+  });
+  return xp;
+}
+
+function getRank(xp) {
+  if (xp >= 3500) return { title: "Nivel 5 · Maestro Dental 👑", lvl: 5, avatar: "👑" };
+  if (xp >= 2200) return { title: "Nivel 4 · Especialista de Gabinete 🦷", lvl: 4, avatar: "🦷" };
+  if (xp >= 1200) return { title: "Nivel 3 · Técnico Clínico ⚙️", lvl: 3, avatar: "⚙️" };
+  if (xp >= 500)  return { title: "Nivel 2 · Explorador Dental 🔍", lvl: 2, avatar: "🔍" };
+  return { title: "Nivel 1 · Novato Dental 🐣", lvl: 1, avatar: "🐣" };
+}
+
+function zoneUnlocked(zIndex) {
+  if (zIndex === 0) return true;
+  const prev = zones[zIndex - 1];
+  if (prev.general) return isDone(prev.id, 0);
+  return true;
+}
+
+function render() {
+  document.getElementById("studentName").value = state.name;
+  const comp = completedCount();
+  const xp = calculateXP();
+  const rank = getRank(xp);
+
+  document.getElementById("statCompleted").textContent = `${comp} / ${total}`;
+  document.getElementById("statXP").textContent = `${xp} XP`;
+  document.getElementById("statLevel").textContent = `Lvl ${rank.lvl}`;
+  document.getElementById("playerRank").textContent = rank.title;
+  document.getElementById("playerAvatar").textContent = rank.avatar;
+
+  const pct = Math.round((comp / total) * 100);
+  document.getElementById("progressText").textContent = `${pct}%`;
+  document.getElementById("progressBar").style.width = pct + "%";
+
+  const container = document.getElementById("zones");
+  container.innerHTML = "";
+
+  zones.forEach((z, zi) => {
+    const unlocked = zoneUnlocked(zi);
+    const doneItems = z.items.filter((_, i) => isDone(z.id, i)).length;
+    const card = document.createElement("div");
+    card.className = "card zone " + (!unlocked ? "locked" : "");
+    
+    let html = `
+      <div class="zone-head">
+        <div class="zone-icon">${z.icon}</div>
+        <div class="zone-title">
+          <h2>${z.title}</h2>
+          <p>${z.desc}</p>
+        </div>
+        <span class="badge">${doneItems}/${z.items.length}</span>
+      </div>`;
+
+    if (!unlocked) {
+      html += `<div class="lock-note">🔒 Completa la fotografía general de la zona anterior para desbloquear este sector.</div>`;
+    }
+
+    html += `<div class="mission-list">`;
+    z.items.forEach((it, i) => {
+      const d = isDone(z.id, i);
+      const photoSrc = state.photos[key(z.id, i)];
+      html += `
+        <div class="mission ${d ? "done" : ""}" ${unlocked ? `onclick="playTapSound(); openMission('${z.id}',${i})"` : ""} style="${unlocked ? "cursor:pointer" : ""}">
+          <div class="dot">${d ? "✓" : i + 1}</div>
+          <span>${it[0]}</span>
+          ${d && photoSrc ? `<img class="mission-thumb" src="${photoSrc}" alt="thumb">` : `<small style="color:var(--muted); font-weight:700;">📷 Capturar</small>`}
+        </div>`;
+    });
+    html += "</div>";
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+
+  document.getElementById("finishCard").classList.toggle("hidden", comp !== total);
+}
+
+function show(view) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.getElementById(view).classList.add("active");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function showHome() {
+  playTapSound(); show("homeView");
+  document.getElementById("navHome").classList.add("active");
+  document.getElementById("navPdf").classList.remove("active");
+  render();
+}
+
+function showPDF() {
+  playTapSound(); show("pdfView");
+  document.getElementById("navPdf").classList.add("active");
+  document.getElementById("navHome").classList.remove("active");
+}
+
+function openMission(zid, i) {
+  const z = zones.find(x => x.id === zid);
+  const it = z.items[i];
+  const k = key(zid, i);
+  const existing = state.photos[k];
+
+  let html = `
+    <div class="mission-detail">
+      <div class="crumb">${z.icon} ${z.title}</div>
+      <div class="detail-icon">${it[1]}</div>
+      <h2 class="detail-title">${it[0]}</h2>
+
+      <div class="info-grid">
+        <div class="info what"><h3>🧠 ¿Qué es?</h3><p>${it[2]}</p></div>
+        <div class="info use"><h3>⚙️ ¿Para qué sirve?</h3><p>${it[3]}</p></div>
+        <div class="info recognize"><h3>👀 ¿Qué debes reconocer?</h3><p>${it[4]}</p></div>
+        <div class="info task"><h3>📸 Tu misión</h3><p>${it[5]}</p></div>
+      </div>
+
+      <div class="photo-box ${existing ? "has-photo" : ""}">
+        <div class="photo-placeholder" id="placeholder_${k}" style="${existing ? "display:none" : ""}">
+          <div class="big">📷</div>
+          <strong>Añade tu evidencia fotográfica</strong><br>
+          <span style="font-size:13px;">Toma la foto en el gabinete o elígela de tu galería.</span>
+        </div>
+        <img id="img_${k}" src="${existing || ""}" alt="Fotografía" style="${existing ? "display:block" : ""}">
+
+        <div class="photo-actions">
+          <label class="btn">
+            📷 Cámara
+            <input class="hidden-file" type="file" accept="image/*" capture="environment" onchange="photoSelected(event,'${k}')">
+          </label>
+          <label class="btn secondary">
+            🖼️ Galería
+            <input class="hidden-file" type="file" accept="image/*" onchange="photoSelected(event,'${k}')">
+          </label>
+        </div>
+        <div class="capture-note">Consejo: Procura que el objeto esté bien enfocado, iluminado y sin personas visibles.</div>
+      </div>
+
+      <div class="complete-row">
+        <input type="checkbox" id="check_${k}" ${existing ? "checked" : ""} onchange="toggleComplete('${zid}',${i},this.checked)">
+        <label for="check_${k}">He identificado correctamente este elemento y adjuntado su foto.</label>
+      </div>
+
+      ${existing ? `<button class="btn ghost" style="margin-top:14px;width:100%" onclick="removePhoto('${zid}',${i})">🗑️️ Repetir fotografía</button>` : ""}
+    </div>`;
+
+  document.getElementById("missionContent").innerHTML = html;
+  show("missionView");
+}
+
+function photoSelected(ev, k) {
+  const file = ev.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith("image/")) { toast("Selecciona una imagen válida."); return; }
+
+  const oldCompleted = completedCount();
+  const reader = new FileReader();
+  reader.onload = e => {
+    resizeImage(e.target.result, 1200, 0.82, data => {
+      state.photos[k] = data;
+      save();
+      playPhotoSound();
+      toast("¡Foto capturada! +100 XP 📸✨");
+
+      const [zid, idx] = k.split("_");
+      openMission(zid, Number(idx));
+      checkRewards(oldCompleted);
+    });
+  };
+  reader.readAsDataURL(file);
+}
+
+function checkRewards(prevCount) {
+  const newCount = completedCount();
+  if (newCount > prevCount) {
+    if (newCount === total) {
+      triggerConfetti();
+      playLevelUpSound();
+      showModal("🏆 ¡MAESTRO DEL GABINETE!", "¡Has completado el 100% de la exploración clínica! Ya puedes descargar tu dossier oficial.", "👑");
+    } else {
+      zones.forEach((z, zi) => {
+        if (z.general && isDone(z.id, 0) && zi + 1 < zones.length) {
+          const nextZone = zones[zi + 1];
+          if (zoneUnlocked(zi + 1)) {
+            triggerConfetti();
+            playLevelUpSound();
+            showModal("¡NUEVO SECTOR DESBLOQUEADO!", `Has completado la foto general. ¡Desbloqueaste: ${nextZone.title}! +250 XP`, "🔓");
+          }
+        }
+      });
+    }
+  }
+}
+
+function resizeImage(src, max, quality, cb) {
+  const img = new Image();
+  img.onload = () => {
+    let w = img.width, h = img.height;
+    if (w > max || h > max) {
+      const r = Math.min(max / w, max / h);
+      w = Math.round(w * r); h = Math.round(h * r);
+    }
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    c.getContext("2d").drawImage(img, 0, 0, w, h);
+    cb(c.toDataURL("image/jpeg", quality));
+  };
+  img.src = src;
+}
+
+function toggleComplete(zid, i, checked) {
+  const k = key(zid, i);
+  if (checked) {
+    if (!state.photos[k]) {
+      toast("Primero añade una fotografía 📷");
+      document.getElementById("check_" + k).checked = false;
+      return;
+    }
+    playTapSound();
+    toast("¡Elemento verificado y completado! ✨");
+  } else {
+    delete state.photos[k];
+  }
+  save(); render();
+}
+
+function removePhoto(zid, i) {
+  playTapSound();
+  delete state.photos[key(zid, i)];
+  save(); openMission(zid, i); render();
+  toast("Fotografía eliminada. Puedes repetir la captura.");
+}
+
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(window.__toast);
+  window.__toast = setTimeout(() => t.classList.remove("show"), 2400);
+}
+
+function showModal(title, desc, icon) {
+  document.getElementById("modalTitle").textContent = title;
+  document.getElementById("modalDesc").textContent = desc;
+  document.getElementById("modalIcon").textContent = icon || "🎉";
+  document.getElementById("rewardModal").classList.add("active");
+}
+
+function closeModal() {
+  playTapSound();
+  document.getElementById("rewardModal").classList.remove("active");
+}
+
+/* CONFETTI ANIMATION */
+function triggerConfetti() {
+  const canvas = document.getElementById("confettiCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const pieces = [];
+  const colors = ["#10b981", "#0284c7", "#8b5cf6", "#f59e0b", "#ec4899"];
+
+  for (let i = 0; i < 90; i++) {
+    pieces.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height - canvas.height,
+      size: Math.random() * 10 + 6,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speed: Math.random() * 5 + 2,
+      rotation: Math.random() * 360
+    });
+  }
+
+  function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    pieces.forEach(p => {
+      p.y += p.speed;
+      p.rotation += 4;
+      if (p.y < canvas.height) alive = true;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+      ctx.restore();
+    });
+    if (alive) requestAnimationFrame(update);
+  }
+  update();
+}
+
+/* PDF PRINT / DOSSIER GENERATION */
+function escHTML(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  }[c]));
+}
+
+function generatePDF() {
+  playTapSound();
+  const win = window.open("", "_blank");
+  if (!win) { toast("Permite las ventanas emergentes para abrir el dossier."); return; }
+
+  const rank = getRank(calculateXP());
+  const style = `
+    <style>
+      body { font-family: system-ui, sans-serif; color: #0f172a; margin: 30px; line-height: 1.5; }
+      h1 { color: #059669; margin-bottom: 4px; }
+      .header-box { border-bottom: 3px solid #10b981; padding-bottom: 12px; margin-bottom: 24px; }
+      .author-pdf { color: #0284c7; font-weight: bold; font-size: 13px; margin-top: 4px; }
+      h2 { margin-top: 28px; border-bottom: 2px solid #a7f3d0; padding-bottom: 6px; color: #0284c7; }
+      h3 { margin-bottom: 4px; font-size: 16px; }
+      p { font-size: 13px; margin: 4px 0; color: #334155; }
+      .item { break-inside: avoid; margin-bottom: 20px; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+      .item img { max-width: 360px; max-height: 260px; border-radius: 10px; display: block; margin: 10px 0; border: 1px solid #cbd5e1; }
+      @media print { button { display: none; } }
+    </style>`;
+
+  let body = `
+    <div class="header-box">
+      <h1>🦷 DENTAL GO · Dossier de Prácticas Clínicas</h1>
+      <div class="author-pdf">Creado por Alejandro Sirigu | @alejandrosirigu</div>
+      <p style="margin-top:10px;"><b>Alumno/a:</b> ${escHTML(state.name || "Sin indicar")}</p>
+      <p><b>Rango Obtenido:</b> ${rank.title} (${calculateXP()} XP)</p>
+      <p><b>Fecha de emisión:</b> ${new Date().toLocaleDateString("es-ES")}</p>
+      <p><b>Evidencias completadas:</b> ${completedCount()} de ${total} elementos</p>
+    </div>`;
+
+  zones.forEach(z => {
+    body += `<h2>${z.icon} ${escHTML(z.title)}</h2>`;
+    z.items.forEach((it, i) => {
+      const photo = state.photos[key(z.id, i)];
+      body += `
+        <div class="item">
+          <h3>${isDone(z.id, i) ? "✓ " : "○ "}${escHTML(it[0])}</h3>
+          <p><b>¿Qué es?</b> ${escHTML(it[2])}</p>
+          <p><b>¿Para qué sirve?</b> ${escHTML(it[3])}</p>
+          <p><b>¿Qué debes reconocer?</b> ${escHTML(it[4])}</p>
+          ${photo ? `<img src="${photo}" alt="Evidencia">` : `<p><i>[Sin evidencia fotográfica]</i></p>`}
+        </div>`;
+    });
+  });
+
+  win.document.write(`<html><head><title>Dossier Dental GO - ${escHTML(state.name || "Alumno")}</title>${style}</head><body>${body}</body></html>`);
+  win.document.close();
+  setTimeout(() => win.print(), 600);
+}
+
+// Inicializar la aplicación
+render();
+</script>
+</body>
+</html>
